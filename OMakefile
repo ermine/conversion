@@ -1,0 +1,55 @@
+.PHONY: testlib mappings makelib clean
+
+FILES[] =
+   config
+   cs
+   cs_utf8
+   cs_utf16
+   cs_ucs2
+   cs_ucs4
+   cs_utf32
+   conversion
+
+LIB = conversion
+
+if $(not $(defined LIBDIR))
+   include ../../config
+   export
+
+OCAMLINCLUDES += $(LIBDIR)
+
+section
+   OCAML_OTHER_LIBS = fstream ini_config
+   .DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+
+TEST_FILES = test
+TEST = test
+
+section
+   OCAML_LIBS += conversion
+   OCamlProgram($(TEST), $(TEST_FILES))
+
+testlib: test
+
+GEN_MAPPINGS_FILES = gen_unimap gen_mappings
+GEN_MAPPINGS = gen_mappings
+
+section
+   OCAMLPACKS[] += pcre fstream
+   gen_unimap.$(EXT_OBJ):
+   gen_mappings.$(EXT_OBJ):
+
+section
+   OCAMLPACKS[] += pcre fstream
+   OCAML_LIBS += conversion
+   OCamlProgram($(GEN_MAPPINGS), $(GEN_MAPPINGS_FILES))
+   
+mappings: gen_mappings
+
+IFILES[] =
+
+LibInstall(makelib, $(LIB), $(IFILES))
+
+clean:
+   $(CLEAN)
+
