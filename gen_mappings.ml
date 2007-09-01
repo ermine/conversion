@@ -1,7 +1,4 @@
-open Types
-
-let decoder_dir = "./data/decoders"
-let encoder_dir = "./data/encoders"
+open Cs
 
 type ftype =
    | TPMAP
@@ -70,7 +67,7 @@ let convert_tpmap file cp size =
    in
    let nl = helper 0 in
    let bin =  
-      open_out_bin (Filename.concat decoder_dir ("IBM" ^ cp ^ ".dec")) in
+      open_out_bin (Filename.concat Config.decoder_dir ("IBM" ^ cp ^ ".dec")) in
    let mar =
       if nl = 1 then
 	 match a2.(0) with
@@ -86,7 +83,7 @@ let convert_tpmap file cp size =
 
 
 let convert_upmap file cp size =
-   let outfile = Filename.concat encoder_dir ("IBM" ^ cp ^ ".enc") in
+   let outfile = Filename.concat Config.encoder_dir ("IBM" ^ cp ^ ".enc") in
       Gen_unimap.process_file file outfile size
 
 let specify_type file =

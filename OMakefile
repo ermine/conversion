@@ -1,5 +1,9 @@
 .PHONY: testlib mappings makelib clean
 
+if $(not $(defined LIBDIR))
+   include ../../config
+   export
+
 FILES[] =
    config
    cs
@@ -10,11 +14,12 @@ FILES[] =
    cs_utf32
    conversion
 
-LIB = conversion
+config.ml:
+   echo $""let decoder_dir = "$(SHAREDIR)/conversion/decoders" "" > $@
+   echo $""let encoder_dir = "$(SHAREDIR)/conversion/encoders" "" >> $@
+   echo $""let aliases_ini = "$(SHAREDIR)/conversion/aliases.ini" "" >> $@
 
-if $(not $(defined LIBDIR))
-   include ../../config
-   export
+LIB = conversion
 
 OCAMLINCLUDES += $(LIBDIR)
 
@@ -31,25 +36,28 @@ section
 
 testlib: test
 
-GEN_MAPPINGS_FILES = gen_unimap gen_mappings
+GEN_MAPPINGS_FILES[] = 
+   config
+   gen_unimap 
+   gen_mappings
+
 GEN_MAPPINGS = gen_mappings
 
-section
-   OCAMLPACKS[] += pcre fstream
-   gen_unimap.$(EXT_OBJ):
-   gen_mappings.$(EXT_OBJ):
+OCAML_LIBS += conversion
+OCAML_OTHER_LIBS += fstream
+USE_OCAMLFIND = true
+OCAMLPACKS[] = pcre
 
-section
-   OCAMLPACKS[] += pcre fstream
-   OCAML_LIBS += conversion
-   OCamlProgram($(GEN_MAPPINGS), $(GEN_MAPPINGS_FILES))
-   
-mappings: gen_mappings
+#.DEFAULT: $(OCamlProgram $(GEN_MAPPINGS), $(GEN_MAPPINGS_FILES))
 
 IFILES[] =
+   cs
 
 LibInstall(makelib, $(LIB), $(IFILES))
 
+mappings: $(GEN_MAPPINGS)
+   ./$(GEN_MAPPINGS) ./data/tables
+
 clean:
-   $(CLEAN)
+   $(CLEAN) $(GEN_MAPPINGS)
 
