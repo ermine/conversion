@@ -1,4 +1,0 @@
-#!/bin/sh
-# Converts a POSIX charmap to a .TXT table
-# Usage: posix2table < table > table.TXT
-grep '^<.*>.*/x[0-9A-Fa-f]*[ 	]*<U....>.*$' | grep -v 'not a real character' | sed -e 's,^<.*>[ 	]*\([/x0-9A-Fa-f]*\)[ 	]*<U\(....\)>.*$,\1	0x\2,' | tr abcdef ABCDEF | sed -e 's,/x\([0-9A-F][0-9A-F]\),\1,g' | sed -e 's,^,0x,' | sort | uniq | grep -v '^0x00	0x\([1-9A-F]...\|.[1-9A-F]..\|..[1-9A-F].\|...[1-9A-F]\)'

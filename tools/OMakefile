@@ -1,0 +1,15 @@
+.PHONY: clean mapgen
+
+OCAMLINCLUDES = ..
+
+TABLE2MAP = table2map
+
+.DEFAULT: $(OCamlProgram $(TABLE2MAP), table2map)
+
+open ../../../config
+
+mapgen:
+   ./table2map ../data/tables $(SHAREDIR)/conversion
+
+clean:
+   $(CLEAN) $(TABLE2MAP)

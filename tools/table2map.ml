@@ -10,7 +10,7 @@ let make_decoder_map infile outfile =
    let tin = open_in infile in
    let data () =
       try Some (input_line tin)
-      with Not_found -> close_in tin; None
+      with End_of_file -> close_in tin; None
    in
    let a1 = Array.make 256 None in
    let a2 = Array.make 256 None in
