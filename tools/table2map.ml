@@ -56,11 +56,9 @@ let make_decoder_map infile outfile =
       close_out outf
 
 let _ =
-   let inpath = Sys.argv.(1)
-   and outpath = Sys.argv.(2) in
-   let files = Sys.readdir inpath in
-      Array.iter (fun file ->
-		     Printf.printf "Processing file %s\n" file;
-		     make_decoder_map (Filename.concat inpath file)
-			(Filename.concat outpath file)
-		 ) files
+   let src = Sys.argv.(1)
+   and decoder_dir = Sys.argv.(2)
+   and _encoder_dir = Sys.argv.(3) in
+
+     (* Printf.printf "Processing file %s\n" src;*)
+      make_decoder_map src (Filename.concat decoder_dir (Filename.basename src))

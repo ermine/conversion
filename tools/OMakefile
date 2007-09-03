@@ -1,4 +1,10 @@
-.PHONY: clean mapgen
+.PHONY: clean dirs makemap
+
+open ../../../config
+
+CONVDIR = $(SHAREDIR)/conversion
+DECODER_DIR = $(CONVDIR)/decoders
+ENCODER_DIR = $(CONVDIR)/encoders
 
 OCAMLINCLUDES = ..
 
@@ -6,10 +12,22 @@ TABLE2MAP = table2map
 
 .DEFAULT: $(OCamlProgram $(TABLE2MAP), table2map)
 
-open ../../../config
+TABLES = $(ls ../data/tables)
 
-mapgen:
-   ./table2map ../data/tables $(SHAREDIR)/conversion
+foreach(table, $(TABLES))
+   $(file $(addprefix $(DECODER_DIR)/, $(basename $(table)))): $(table)
+      $(shell ./$(TABLE2MAP)$(EXE) $(table) $(DECODER_DIR) $(ENCODER_DIR))
+  
+$(DECODER_DIR):
+   mkdir -p $@
+
+$(ENCODER_DIR):
+   mkdir -p $@
+
+$(file $(addprefix $(DECODER_DIR)/, $(basename $(TABLES)))): $(DECODER_DIR) $(ENCODER_DIR) $(TABLE2MAP)$(EXE)
+
+makemap: $(file $(addprefix $(DECODER_DIR)/, $(basename $(TABLES))))
+   install ../data/aliases.ini $(CONVDIR)
 
 clean:
    $(CLEAN) $(TABLE2MAP)
