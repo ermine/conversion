@@ -1,4 +1,4 @@
-.PHONY: clean dirs makemap
+.PHONY: makemap install clean
 
 open ../../../config
 
@@ -28,6 +28,8 @@ $(file $(addprefix $(DECODER_DIR)/, $(basename $(TABLES)))): $(DECODER_DIR) $(EN
 
 makemap: $(file $(addprefix $(DECODER_DIR)/, $(basename $(TABLES))))
    install ../data/aliases.ini $(CONVDIR)
+
+install: makemap
 
 clean:
    $(CLEAN) $(TABLE2MAP)

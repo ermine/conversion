@@ -1,8 +1,8 @@
-.PHONY: testlib mappings makelib clean
+.PHONY: testlib mappings makelib install clean
 
-if $(not $(defined LIBDIR))
-   include ../../config
-   export
+open ../../config
+
+.SUBDIRS: tools
 
 FILES[] =
    config
@@ -57,6 +57,8 @@ LibInstall(makelib, $(LIB), $(IFILES))
 
 mappings: $(GEN_MAPPINGS)
    ./$(GEN_MAPPINGS) ./data/tables
+
+install: makelib
 
 clean:
    $(CLEAN) $(GEN_MAPPINGS) config.ml
