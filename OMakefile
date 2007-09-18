@@ -1,8 +1,8 @@
-.PHONY: testlib mappings makelib install clean
+.PHONY: makelib mappings testlib install clean
 
 open ../../config
 
-.SUBDIRS: tools
+#.SUBDIRS: tools
 
 FILES[] =
    config
@@ -23,9 +23,9 @@ LIB = conversion
 
 OCAMLINCLUDES += $(LIBDIR)
 
-section
-   OCAML_OTHER_LIBS = fstream ini_config
-   .DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+OCAML_OTHER_LIBS = fstream ini_config
+
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
 
 TEST_FILES = test
 TEST = test
