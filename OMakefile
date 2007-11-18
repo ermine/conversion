@@ -52,8 +52,11 @@ OCAMLPACKS[] = pcre
 
 IFILES[] =
    cs
+   conversion
 
-LibInstall(makelib, $(LIB), $(IFILES))
+ALIBS[] =
+
+LibInstall(makelib, $(LIB), $(IFILES), $(ALIBS))
 
 mappings: $(GEN_MAPPINGS)
    ./$(GEN_MAPPINGS) ./data/tables
