@@ -2,7 +2,7 @@
 
 open ../../config
 
-#.SUBDIRS: tools
+.SUBDIRS: tools
 
 FILES[] =
    config

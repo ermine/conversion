@@ -14,19 +14,19 @@ TABLE2MAP = table2map
 
 TABLES = $(ls ../data/tables)
 
-foreach(table, $(TABLES))
-   $(file $(addprefix $(DECODER_DIR)/, $(basename $(table)))): $(table)
-      $(shell ./$(TABLE2MAP)$(EXE) $(table) $(DECODER_DIR) $(ENCODER_DIR))
-  
 $(DECODER_DIR):
    mkdir -p $@
 
 $(ENCODER_DIR):
    mkdir -p $@
 
-$(file $(addprefix $(DECODER_DIR)/, $(basename $(TABLES)))): $(DECODER_DIR) $(ENCODER_DIR) $(TABLE2MAP)$(EXE)
+foreach(table, $(TABLES))
+   $(DECODER_DIR)/$(basename $(table)).dec: $(table) $(DECODER_DIR) $(ENCODER_DIR)
+      $(shell ./$(TABLE2MAP)$(EXE) $(table) $(DECODER_DIR)/$(basename $(table)).dec $(ENCODER_DIR)/$(basename $(table)).enc)
 
-makemap: $(file $(addprefix $(DECODER_DIR)/, $(basename $(TABLES))))
+DECODERS = $(file $(addsuffix .dec, $(addprefix $(DECODER_DIR)/, $(basename $(TABLES)))))
+
+makemap: $(DECODERS) $(TABLE2MAP)$(EXE)
    install ../data/aliases.ini $(CONVDIR)
 
 install: makemap

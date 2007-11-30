@@ -57,8 +57,8 @@ let make_decoder_map infile outfile =
 
 let _ =
    let src = Sys.argv.(1)
-   and decoder_dir = Sys.argv.(2)
-   and _encoder_dir = Sys.argv.(3) in
+   and decoder = Sys.argv.(2)
+   and _encoder = Sys.argv.(3) in
 
      (* Printf.printf "Processing file %s\n" src;*)
-      make_decoder_map src (Filename.concat decoder_dir (Filename.basename src))
+      make_decoder_map src decoder
