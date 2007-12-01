@@ -21,7 +21,7 @@ $(ENCODER_DIR):
    mkdir -p $@
 
 foreach(table, $(TABLES))
-   $(DECODER_DIR)/$(basename $(table)).dec: $(table) $(DECODER_DIR) $(ENCODER_DIR)
+   $(DECODER_DIR)/$(basename $(table)).dec: $(table) $(DECODER_DIR) $(ENCODER_DIR) $(TABLE2MAP)$(EXE)
       $(shell ./$(TABLE2MAP)$(EXE) $(table) $(DECODER_DIR)/$(basename $(table)).dec $(ENCODER_DIR)/$(basename $(table)).enc)
 
 DECODERS = $(file $(addsuffix .dec, $(addprefix $(DECODER_DIR)/, $(basename $(TABLES)))))
