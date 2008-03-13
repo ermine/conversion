@@ -64,5 +64,5 @@ mappings: $(GEN_MAPPINGS)
 install: makelib
 
 clean:
-   $(CLEAN) $(GEN_MAPPINGS) config.ml
+   $(CLEAN) $(GEN_MAPPINGS) config.ml $(TEST)$(EXE)
 
