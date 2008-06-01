@@ -1,8 +1,4 @@
-.PHONY: makelib mappings testlib install clean
-
-open ../../config
-
-.SUBDIRS: tools
+.PHONY: makelib mappings makemap testlib install clean
 
 FILES[] =
    config
@@ -20,8 +16,6 @@ config.ml:
    echo $""let aliases_ini = "$(SHAREDIR)/conversion/aliases.ini" "" >> $@
 
 LIB = conversion
-
-OCAMLINCLUDES += $(LIBDIR)
 
 OCAML_OTHER_LIBS = fstream ini_config
 
@@ -43,12 +37,17 @@ GEN_MAPPINGS_FILES[] =
 
 GEN_MAPPINGS = gen_mappings
 
-OCAML_LIBS += conversion
-OCAML_OTHER_LIBS += fstream
-USE_OCAMLFIND = true
-OCAMLPACKS[] = pcre
-
-#.DEFAULT: $(OCamlProgram $(GEN_MAPPINGS), $(GEN_MAPPINGS_FILES))
+section
+   OCAML_LIBS += conversion
+   USE_OCAMLFIND = true
+   OCAMLPACKS[] = pcre
+   gen_mappings.cmx gen_mappings$(EXT_OBJ):
+   gen_mappings.cmo:
+   gen_mappings.cmi:
+   gen_unimap.cmx gen_unimap$(EXT_OBJ):
+   gen_unimap.cmo:
+   gen_unimap.cmi:
+   .DEFAULT: $(OCamlProgram $(GEN_MAPPINGS), $(GEN_MAPPINGS_FILES))
 
 IFILES[] =
    cs
@@ -62,6 +61,8 @@ mappings: $(GEN_MAPPINGS)
    ./$(GEN_MAPPINGS) ./data/tables
 
 install: makelib
+
+.SUBDIRS: tools
 
 clean:
    $(CLEAN) $(GEN_MAPPINGS) config.ml $(TEST)$(EXE)

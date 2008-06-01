@@ -1,14 +1,14 @@
 .PHONY: makemap install clean
 
-open ../../../config
-
 CONVDIR = $(SHAREDIR)/conversion
 DECODER_DIR = $(CONVDIR)/decoders
 ENCODER_DIR = $(CONVDIR)/encoders
 
-OCAMLINCLUDES = ..
+OCAMLINCLUDES += ..
 
 TABLE2MAP = table2map
+
+OCAML_LIBS = ../conversion
 
 .DEFAULT: $(OCamlProgram $(TABLE2MAP), table2map)
 
