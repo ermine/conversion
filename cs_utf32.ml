@@ -5,7 +5,6 @@
  * http://www.unicode.org/reports/tr19/tr19-9.html
  *)
 
-open Fstream
 open Cs
 
 let be32 = Int32.of_string "0xfeff0000"
@@ -28,67 +27,36 @@ let chars4_of_ucs4 bo ucs4 =
 	    Char.chr ((ucs4 lsr 16) land 0xFF );
 	    Char.chr 0x00]
 
-let rec decode_utf32 bo =
-   let f ucs4 =
-      if ucs4 = 0x0000feff then
-	 F (decode_utf32 BE)
-      else if Int32.compare (Int32.of_int ucs4) be32 = 0 then
-	 F (decode_utf32 LE)
-      else if ucs4 < 0x110000 &&
-	 not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	    R (ucs4, decode_utf32 bo)
+let decode_utf32 bo =
+  let bo = ref bo in
+    fun str i ->
+      if i+3 < String.length str then
+        let b1 = Char.code str.[i]
+        and b2 = Char.code str.[i+1]
+        and b3 = Char.code str.[1+2]
+        and b4 = Char.code str.[i+3] in
+        let ucs4 =
+          match !bo with
+            | BE -> (b1 lsl 24) + (b2 lsl 16) + (b3 lsl 8) + b4
+            | LE -> b1 + (b2 lsl 8) + (b3 lsl 16) + (b4 lsl 24)
+        in
+          if ucs4 = 0x0000feff then (
+            bo := BE;
+            Shift (i+4)
+          ) else if Int32.compare (Int32.of_int ucs4) be32 = 0 then (
+            bo := LE;
+            Shift (i+4)
+          ) else if ucs4 < 0x110000 &&
+	          not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
+              Result (i+4, ucs4)
+          else
+            Invalid
       else
-	 raise Malformed
-   in read4 bo f
+        TooFew
 
-let rec encode_utf32 bo =
-   fun ucs4 ->
-      if ucs4 < 0x110000 && not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	 let chars = chars4_of_ucs4 bo ucs4 in
-	    R (chars, encode_utf32 bo)
-      else
-	 raise Malformed
+let encode_utf32 bo ucs4 =
+  if ucs4 < 0x110000 && not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
+	  chars4_of_ucs4 bo ucs4
+  else
+	  raise Malformed
 
-let rec decode_utf32be b1 =
-   let f ucs4 =
-      if ucs4 < 0x110000 && not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	 R (ucs4, decode_utf32be)
-      else
-	 raise Malformed
-   in
-      read4 BE f b1
-
-let rec encode_utf32be =
-   fun ucs4 ->
-      if ucs4 < 0x110000 && not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	 let chars = chars4_of_ucs4 BE ucs4 in
-	    R (chars, encode_utf32be)
-      else
-	 raise Malformed
-
-let rec decode_utf32le b1 =
-   let f ucs4 =
-      if ucs4 < 0x110000 && not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	 R (ucs4, decode_utf32le)
-      else
-	 raise Malformed
-   in
-      read4 LE f b1
-
-let rec encode_utf32le =
-   fun ucs4 ->
-      if ucs4 < 0x110000 && not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	 let chars = chars4_of_ucs4 LE ucs4 in
-	    R (chars, encode_utf32le)
-      else
-	 raise Malformed
-
-let fun_decode_utf32 = decode_utf32 BE
-
-let fun_encode_utf32 = 
-   fun ucs4 ->
-      match encode_utf32 BE ucs4 with
-         | F f -> R (chars_of_bo BE, f)
-         | R (r, f) -> R( chars_of_bo BE @ r, f)
-
- 

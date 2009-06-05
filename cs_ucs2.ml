@@ -2,25 +2,24 @@
   * UCS-2
  *)
 
-open Fstream
 open Cs
 
-let rec decode_ucs2 b1 =
-   let f ucs4 =
+let decode_ucs2 str i =
+  if i+1 < String.length str then
+    let b1 = Char.code str.[i]
+    and b2 = Char.code str.[i+1] in
+    let ucs4 = (b1 lsl 8) + b2 in
       if ucs4 >= 0xd800 && ucs4 < 0xe000 then
-	 raise Malformed
+        Invalid
       else
-	 R (ucs4, decode_ucs2)
-   in
-      read2 BE f b1
+        Result (i+2, ucs4)
+  else
+    TooFew
 
-let rec encode_ucs2 =
-   fun ucs4 ->
-      if ucs4 < 0x10000 && ucs4 != 0xfffe && 
-	 not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
-	    let chars = [Char.chr ((ucs4 lsr 8) land 0xFF);
+let encode_ucs2 ucs4 =
+  if ucs4 < 0x10000 && ucs4 != 0xfffe && 
+	  not (ucs4 >= 0xd800 && ucs4 < 0xe000) then
+	    [Char.chr ((ucs4 lsr 8) land 0xFF);
 			 Char.chr (ucs4 land 0xFF)]
-	    in
-	       R (chars, encode_ucs2)
-      else
-	 raise Malformed
+  else
+	  raise Malformed
