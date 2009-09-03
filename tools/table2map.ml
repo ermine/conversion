@@ -23,32 +23,18 @@ let read_file infile =
     List.rev data
       
 let u2s_map data =
-  let rec aux_umap xs umap =
-    match xs with
-      | [] -> umap
-      | (enc, ucs4) :: tail ->
-          let newumap =
-            UMap.add ucs4 (Char.chr enc) umap
-          in
-            aux_umap tail newumap
-  in
-    aux_umap data (UMap.empty)
+  List.fold_left (fun umap (enc, ucs4) -> UMap.add ucs4 (Char.chr enc) umap)
+    UMap.empty data
 
 let u2m_map data =
   let rec bytes i =
     if i < 0x100 then
       [Char.chr i]
     else
-      Char.chr (i land 0xFFF) :: bytes (i lsr 8) 
+      Char.chr (i land 0xFF) :: bytes (i lsr 8)
   in    
-  let rec aux_umap xs umap =
-    match xs with
-      | [] -> umap
-      | (enc, ucs4) :: tail ->
-          let newumap = UMap.add ucs4 (bytes enc) umap in
-            aux_umap tail newumap
-  in
-    aux_umap data UMap.empty
+    List.fold_left (fun umap (enc, ucs4) -> UMap.add ucs4 (bytes enc) umap)
+      UMap.empty data
 
 let sb2ucs4 data =
   let a = Array.make 256 None in
@@ -58,30 +44,29 @@ let sb2ucs4 data =
 let mb2ucs4 data =
   let a1 = Array.make 256 None in
   let a2 = Array.make 256 None in
-  let rec aux_map j xs =
-    match xs with
-      | [] ->
-          MBtoUCS4 (a1, a2)
-      | (enc, ucs4) :: tail ->
-	        let b1 = enc lsr 8 land 0xFF
-	        and b2 = enc land 0xFF in
-            if enc > 0xFFFF then
-              failwith "enc is too big";
-		        match a1.(b1) with
-		          | Some l -> (
-			            match a2.(l) with
-			              | Some a3 ->
-				                a3.(b2) <- Some ucs4;
-				                aux_map j tail
-			              | None ->
-				                failwith "Malformed array"
-		            )
-		          | None ->
-			            a1.(b1) <- Some j;
-			            let a3 = Array.make 256 None in
-			              a3.(b2) <- Some ucs4;
-			              a2.(j) <- Some a3;
-			              aux_map (succ j) tail
+  let rec aux_map j = function
+    | [] ->
+        MBtoUCS4 (a1, a2)
+    | (enc, ucs4) :: tail ->
+	      let b1 = enc lsr 8 land 0xFF
+	      and b2 = enc land 0xFF in
+          if enc > 0xFFFF then
+            failwith "enc is too big";
+		      match a1.(b1) with
+		        | Some l -> (
+			          match a2.(l) with
+			            | Some a3 ->
+				              a3.(b2) <- Some ucs4;
+				              aux_map j tail
+			            | None ->
+				              failwith "Malformed array"
+		          )
+		        | None ->
+			          a1.(b1) <- Some j;
+			          let a3 = Array.make 256 None in
+			            a3.(b2) <- Some ucs4;
+			            a2.(j) <- Some a3;
+			            aux_map (succ j) tail
   in
     aux_map 0 data
 
