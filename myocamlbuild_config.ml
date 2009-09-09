@@ -118,10 +118,29 @@ let bytecode = true
 let nativecode = true
 
 let make_deps name =
-  if bytecode then
-    name -.- "cma" :: (if nativecode then [name -.- "cmxa"] else [])
-  else
-    (if nativecode then [name -.- "cmxa"] else [])
+  let bytecode_dep () =
+    if bytecode then [name -.- "cma"] else []
+  in
+  let nativecode_dep acc =
+    if nativecode then
+      name -.- "cmxa" :: acc else acc
+  in
+    nativecode_dep (bytecode_dep ())
+
+let make_mllib_files name =
+  let mllib = name -.- "mllib" in
+    if Pathname.exists mllib then
+      List.fold_left (fun acc f ->
+                        let f = String.uncapitalize f in
+                          if Pathname.exists (f -.- "mli") then
+                            A (f -.- "mli") :: A (f -.- "cmi") :: acc
+                          else
+                            A (f -.- "cmi") :: acc
+                       ) [A (name -.- "a")] (string_list_of_file mllib)
+    else if Pathname.exists (name -.- "mli") then
+      [A (name -.- "mli") ; A (name -.- "cmi")]
+    else
+      [A (name -.- "cmi")]
 
 let install_lib name ?cma modules =
   let cma =
@@ -135,25 +154,10 @@ let install_lib name ?cma modules =
       ~deps
       (fun env _build ->
          let deps = List.map (fun file -> A file) deps in
-         let mllib =
-           let mllib = cma -.- "mllib" in
-             if Pathname.exists mllib then
-               let l =
-                 List.map String.uncapitalize (string_list_of_file mllib) in
-                 List.fold_left (fun acc f ->
-                                   if Pathname.exists (f -.- "mli") then
-                                     A (f -.- "mli") :: A (f -.- "cmi") :: acc
-                                   else
-                                     A (f -.- "cmi") :: acc
-                                ) [A (cma -.- "a")] l
-             else if Pathname.exists (cma -.- "mli") then
-               [A (cma -.- "mli") ; A (cma -.- "cmi")]
-             else
-               [A (cma -.- "cmi")]
-         in
+         let mllib = make_mllib_files cma in
          let files = List.map (fun file -> A file) modules in
            Seq [Cmd (S[A"mkdir"; A"-p"; P (install_dir / name)]);
-                Cmd (S[Px"install"; S deps; P (install_dir / name)]);
+                Cmd (S[Px"install"; S deps; S files; P (install_dir / name)]);
                 Cmd (S[Px"install"; S mllib; S files; P (install_dir / name)]);
                ]
       )

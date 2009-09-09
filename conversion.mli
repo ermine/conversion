@@ -2,10 +2,8 @@
  * (c) 2007-2009 Anastasia Gornostaeva <ermine@ermine.pp.ru>
  *)
 
-type cfg = {
-  decoder_dir : string;
-  encoder_dir : string;
-}
+val decoder_path : string ref
+val encoder_path : string ref
 
 val aliases : (string, string) Hashtbl.t
 
@@ -19,8 +17,10 @@ val decoders : (string, Cs.decoder_table Weak.t) Hashtbl.t
 
 val encoders : (string, Cs.encoder_table Weak.t) Hashtbl.t
 
-val make_decoder : cfg -> string -> (string -> int -> Cs.t)
+val make_decoder : string -> (string -> int -> Cs.t)
 
-val make_encoder : cfg -> string -> (Cs.ucs4 -> char list)
+val make_encoder : string -> (Cs.ucs4 -> char list)
 
-val recode_string : cfg -> in_enc:string -> out_enc:string -> string -> string
+val recode_string : in_enc:string -> out_enc:string -> string -> string
+
+val init : decoder_dir:string -> encoder_dir:string -> unit -> unit
