@@ -3,7 +3,6 @@ open Myocamlbuild_config
 
 let conversion_decoder_dir = "../../share/conversion/decoders"
 let conversion_encoder_dir = "../../share/conversion/encoders"
-let conversion_aliases_ini = "../../conversion/aliases.ini"
 
 let codec_maps =
   let srcdir = "data/tables" in
